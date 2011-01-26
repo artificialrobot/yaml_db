@@ -13,12 +13,21 @@ namespace :db do
     def dump_dir(dir = "")
       "#{Rails.root}/db#{dir}"
     end
-
+		
     desc "Dump contents of database to db/data.extension (defaults to yaml)"
-    task :dump => :environment do
+	  task :dump => :environment do
       format_class = ENV['class'] || "YamlDb::Helper"
       helper = format_class.constantize
-      SerializationHelper::Base.new(helper).dump db_dump_data_file helper.extension
+      filter = ENV['filter_tables']
+      SerializationHelper::Base.new(helper,filter).dump db_dump_data_file helper.extension
+    end
+
+    desc "Dump contents of database to curr_dir_name/tablename.extension (defaults to yaml)"
+    task :dump_dir => :environment do
+      format_class = ENV['class'] || "YamlDb::Helper"
+      dir = ENV['dir'] || "#{Time.now.to_s.gsub(/ /, '_')}"
+      filter = ENV['filter_tables']
+      SerializationHelper::Base.new(format_class.constantize, filter).dump_to_dir dump_dir("/#{dir}")
     end
 
     desc "Dump contents of database to curr_dir_name/tablename.extension (defaults to yaml)"
