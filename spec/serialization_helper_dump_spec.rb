@@ -82,27 +82,40 @@ describe SerializationHelper::Dump do
       SerializationHelper::Dump.dump(nil)
 
       # Restore default behaviour
-      SerializationHelper::Dump.filter_table_names = nil
+      SerializationHelper::Dump.whitelist = nil
+      SerializationHelper::Dump.blacklist = nil
     end
     
-    it "should dump every table if filter not set" do
-      SerializationHelper::Dump.filter_table_names = nil
+    it "should dump every table if no filters are set" do
+      SerializationHelper::Dump.whitelist = nil
+      SerializationHelper::Dump.blacklist = nil
       @expected_tables =  ['mytable1', 'mytable2', 'mytable3']
     end
 
-    it "should dump matching tables if filter is set as a matching string" do
-      SerializationHelper::Dump.filter_table_names = "mytable"
-      @expected_tables =  ['mytable1', 'mytable2', 'mytable3']
-    end
-    
-    it "should dump matching tables if filter is set as a regular expression string" do
-      SerializationHelper::Dump.filter_table_names = "mytable[1-2]"
-      @expected_tables =  ['mytable1', 'mytable2']
-    end
-
-    it "should not dump any table if filter does not match any table" do
-      SerializationHelper::Dump.filter_table_names = "wadustable"
+    it "should reject matching tables if blacklist is set" do
+      SerializationHelper::Dump.blacklist = "mytable.*"
       @expected_tables =  []
+    end
+
+    it "should return all if only whitelist tables are set" do
+      SerializationHelper::Dump.whitelist = "foo"
+      @expected_tables =  [ 'mytable1', 'mytable2', 'mytable3' ]
+    end
+
+    it "should return return correct tables when blacklist and whitelist are both set" do
+      SerializationHelper::Dump.whitelist = "mytable1"
+      SerializationHelper::Dump.blacklist = "mytable.*"
+      @expected_tables =  [ 'mytable1' ]
+    end
+
+    it "should reject matching tables if blacklist is set as a regular expression string" do
+      SerializationHelper::Dump.blacklist = "mytable[1-2]"
+      @expected_tables =  ['mytable3']
+    end
+
+    it "should not dump all tables if filter does not match any table" do
+      SerializationHelper::Dump.blacklist = "wadustable"
+      @expected_tables =  [ 'mytable1', 'mytable2', 'mytable3' ]
     end
     
   end

@@ -3,11 +3,14 @@ module SerializationHelper
   class Base
     attr_reader :extension
 
-    def initialize(helper, filter_table_names = nil)
+    def initialize(helper, table_filters)
       @dumper = helper.dumper
       @loader = helper.loader
       @extension = helper.extension
-      @dumper.filter_table_names = filter_table_names if filter_table_names
+      if table_filters && table_filters.any?
+        @dumper.whitelist = table_filters[:whitelist]
+        @dumper.blacklist = table_filters[:blacklist]
+      end
     end
 
     def dump(filename)
@@ -143,7 +146,7 @@ module SerializationHelper
 
   class Dump
     class << self
-      attr_accessor :filter_table_names
+      attr_accessor :whitelist, :blacklist
     end
 
     def self.before_table(io, table)
@@ -163,9 +166,16 @@ module SerializationHelper
     end
 
     def self.tables
-      all_tables = ActiveRecord::Base.connection.tables.reject { |table| ['schema_info', 'schema_migrations'].include?(table) }
+      whitelist_filter = /\A#{whitelist}\z/ if whitelist
+      blacklist_filter = /\A#{blacklist}\z/ if blacklist
 
-      filter_table_names ? all_tables.grep(Regexp.new(filter_table_names)) : all_tables
+      all_tables = ActiveRecord::Base.connection.tables
+      whitelist_tables = all_tables.grep whitelist_filter if whitelist_filter
+
+      system_tables = %w(schema_info schema_migrations)
+      allowed_tables = all_tables.reject { |table| system_tables.include?(table) || (blacklist_filter && table =~ blacklist_filter) }
+      allowed_tables.push(*whitelist_tables) if whitelist_tables
+      allowed_tables
     end
 
     def self.dump_table(io, table)

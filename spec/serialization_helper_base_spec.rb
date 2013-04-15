@@ -14,8 +14,8 @@ describe SerializationHelper::Base do
 
     def stub_helper!
         @helper = mock("MyHelper")
-        @dumper = mock("MyDumper");
-        @loader = mock("MyLoader");
+        @dumper = mock("MyDumper")
+        @loader = mock("MyLoader")
         @helper.stub!(:dumper).and_return(@dumper)
         @helper.stub!(:loader).and_return(@loader)
         @helper.stub!(:extension).and_return("yml")
@@ -33,12 +33,13 @@ describe SerializationHelper::Base do
       end
 
       it "should create the number of files that there are tables" do
-         SerializationHelper::Base.new(@helper).dump_to_dir "dir_name"
+         SerializationHelper::Base.new(@helper, []).dump_to_dir "dir_name"
       end   
 
       it "should be able to be configured such as it will dump only selected tables" do
-        @dumper.should_receive(:"filter_table_names=").with("table_filter")
-        SerializationHelper::Base.new(@helper, "table_filter").dump_to_dir "dir_name"
+        @dumper.should_receive(:"whitelist=").with("whitelist")
+        @dumper.should_receive(:"blacklist=").with("blacklist")
+        SerializationHelper::Base.new(@helper, {whitelist: "whitelist", blacklist: "blacklist"}).dump_to_dir "dir_name"
       end
 
     end
@@ -53,7 +54,7 @@ describe SerializationHelper::Base do
       end
 
       it "should insert into then umber of tables that there are files" do
-        SerializationHelper::Base.new(@helper).load_from_dir "dir_name"        
+        SerializationHelper::Base.new(@helper, []).load_from_dir "dir_name"
       end
 
     end
