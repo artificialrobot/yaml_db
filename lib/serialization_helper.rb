@@ -172,7 +172,7 @@ module SerializationHelper
       all_tables = ActiveRecord::Base.connection.tables
       whitelist_tables = all_tables.grep whitelist_filter if whitelist_filter
 
-      system_tables = %w(schema_info schema_migrations)
+      system_tables = %w(schema_info)
       allowed_tables = all_tables.reject { |table| system_tables.include?(table) || (blacklist_filter && table =~ blacklist_filter) }
       allowed_tables.push(*whitelist_tables) if whitelist_tables
       allowed_tables
