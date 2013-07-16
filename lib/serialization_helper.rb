@@ -37,11 +37,8 @@ module SerializationHelper
     end
 
     def load_from_dir(dirname, truncate = true)
-      Dir.entries(dirname).each do |filename|
-        if filename =~ /^[.]/
-          next
-        end
-        @loader.load(File.new("#{dirname}/#{filename}", "r"), truncate)
+      Dir.glob("#{dirname}/*.yml") do |filename|
+        @loader.load(File.new(filename, "r"), truncate)
       end   
     end
 
