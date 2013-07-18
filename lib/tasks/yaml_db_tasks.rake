@@ -31,7 +31,7 @@ namespace :db do
     desc "Dump contents of database to curr_dir_name/tablename.extension (defaults to yaml)"
     task :dump_dir => :environment do
       format_class = ENV['class'] || "YamlDb::Helper"
-      dir = dump_dir('/' + ENV['dir'] || "#{Time.now.to_s.gsub(/ /, '_')}")
+      dir = dump_dir("/#{ENV['dir'] || Time.now.to_s.gsub(/ /, '_')}")
       if File.directory?(dir) && File.exists?(dir)
         FileUtils.rm_rf dir
       end
