@@ -54,9 +54,7 @@ module SerializationHelper
   
   class Load
     def self.load(io, truncate = true)
-      ActiveRecord::Base.connection.transaction do
-        load_documents(io, truncate)
-      end
+      load_documents(io, truncate)
     end
 
     def self.truncate_table(table)

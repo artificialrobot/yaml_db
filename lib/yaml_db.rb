@@ -60,7 +60,9 @@ module YamlDb
         YAML.load_documents(io) do |ydoc|
           ydoc.keys.each do |table_name|
             next if ydoc[table_name].nil?
-            load_table(table_name, ydoc[table_name], truncate)
+            ActiveRecord::Base.connection.transaction do
+              load_table(table_name, ydoc[table_name], truncate)
+            end
           end
         end
     end
